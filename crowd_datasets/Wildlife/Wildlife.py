@@ -96,13 +96,15 @@ def load_data(img_gt_path, train):
     img_path, gt_path = img_gt_path
     # load the images
     img = cv2.imread(img_path)
+    height, width, channels = img.shape #<------ added
     img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
     # load ground truth points
     points = []
     with open(gt_path) as f_label:
         for line in f_label:
-            x = float(line.strip().split(' ')[0])
-            y = float(line.strip().split(' ')[1])
+            stripped_line = line.strip().split(' ')
+            x = (float(stripped_line[1])) * width
+            y = (float(stripped_line[2])) * height
             points.append([x, y])
 
     return img, np.array(points)
