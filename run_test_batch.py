@@ -110,7 +110,16 @@ def main(args, debug=False):
             # save the visualized image
             cv2.imwrite(os.path.join(args.output_dir, '{}pred{}.jpg'.format(filename,predict_cnt)), img_to_draw)
 
-            listfile.write(filename + ".png" + " " + "{}".format(predict_cnt) + '\n')   #write two filenames to the file
+            # save p2p_coords in text file
+            # txt_out = os.path.join(args.output_dir, '{}pred{}.txt'.format(filename,predict_cnt))
+            txt_out = os.path.join(args.output_dir, '{}.txt'.format(filename))
+
+            with open(txt_out, 'w') as f:
+                for p in points:
+                    # f.write(str(p[0]) +" "+ str(p[1])) #(f"{line}\n")
+                    f.write("{} {}\n".format(str((p[0])/width), str((p[1])/ height)))
+
+            listfile.write(filename + ".png" + " " + "{}".format(predict_cnt) + '\n')  
             #ground_truths.append([filename, predict_cnt])
             #val_outputs.append([filename,img_to_draw,predict_cnt])
 

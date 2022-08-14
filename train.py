@@ -53,7 +53,7 @@ def get_args_parser():
 
     # dataset parameters
     parser.add_argument('--dataset_file', default='Wildlife') #<--------------------
-    parser.add_argument('--data_root', default='../../database2', #<--------------------
+    parser.add_argument('--data_root', default='../../database_1', #<--------------------
                         help='path where the dataset is')
     
     parser.add_argument('--output_dir', default='./log',
@@ -76,6 +76,16 @@ def get_args_parser():
     return parser
 
 def main(args):
+
+    if os.path.exists(args.output_dir):
+        os.rmdir(args.output_dir)
+        os.rmdir(args.checkpoints_dir)
+        os.rmdir(args.tensorboard_dir)
+
+    os.mkdir(args.output_dir)
+    os.mkdir(args.checkpoints_dir)
+    os.mkdir(args.tensorboard_dir)
+
     os.environ["CUDA_VISIBLE_DEVICES"] = '{}'.format(args.gpu_id)
     # create the logging file
     run_log_name = os.path.join(args.output_dir, 'run_log.txt')
