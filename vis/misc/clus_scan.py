@@ -14,7 +14,7 @@ from sklearn import metrics
 from sklearn.preprocessing import StandardScaler
 
 db_dir = "/home/n10203478/EGH400/database/"
-p2p_dir = "/home/n10203478/EGH400/koaladetection/CrowdCounting-P2PNet/" 
+p2p_dir = "/home/n10203478/EGH400/koaladetection/CrowdCounting-P2PNet/"  
 out_scatterimg = './scatterimages_10/'     # name of dir to save scatter plot images to
 out_txtname = 'clus_scan_out_10_test.txt'  # name of txt file to print results to
 # p2ptr_names=['run_1','run_2', 'run_3', 'run_4', 'run_5']  # expected naming convention
@@ -116,41 +116,42 @@ def main():
             mse = round(metrics.mean_squared_error(test_x,test_y),5)
 
             # only record value if below 0.3
-            if mse<= 0.3 or mae <=0.3:
+            if mse<= 0.45 or mae <=0.3:
 
                 output.append([eps, min_pts, mse, mae, acc])
 
                 # -------------------------------------------------------------------------
                 # Generating scatterplot of cluster results (for visualisation) - comment out section if not needed.
                 # -------------------------------------------------------------------------
-                cluster_pts = cluster_all(eps,min_pts,len(gt_test))
+                if out_scatterimg:
+                    cluster_pts = cluster_all(eps,min_pts,len(gt_test))
 
-                cluster_pts_sorted = sorted(cluster_pts, key=lambda tup: tup[0])
-                test_y=column(cluster_pts_sorted, 1) 
+                    cluster_pts_sorted = sorted(cluster_pts, key=lambda tup: tup[0])
+                    test_y=column(cluster_pts_sorted, 1) 
 
-                #Generate a list of unique points
-                points=list(set(zip(test_x,test_y))) 
-                #Generate a list of point counts
-                count=[len([x for x,y in zip(test_x,test_y) if x==p[0] and y==p[1]]) for p in points]
+                    #Generate a list of unique points
+                    points=list(set(zip(test_x,test_y))) 
+                    #Generate a list of point counts
+                    count=[len([x for x,y in zip(test_x,test_y) if x==p[0] and y==p[1]]) for p in points]
 
-                # Plotting:
-                plot_x=[i[0] for i in points]
-                plot_y=[i[1] for i in points]
-                count=np.array(count)
+                    # Plotting:
+                    plot_x=[i[0] for i in points]
+                    plot_y=[i[1] for i in points]
+                    count=np.array(count)
 
-                fig=plt.figure(figsize=[8,4])
-                ax=fig.add_subplot(1, 1, 1)
-                plt.xlim(-0.5, max(test_x)+1)
-                plt.ylim(-0.75, 14)
-                plt.scatter(plot_x,plot_y,c=count,s=30*count**0.5,cmap='Spectral_r', linewidths=0.4, edgecolors=(0,0,0))
-                plt.colorbar()
-                plt.xlabel('Ground Truth Count\nEps:{}, Min pts={}'.format(eps,min_pts)), plt.ylabel('Predicted Count')
-                plt.title("Test set: Cluster Consensus vs Ground Truth Scatterplot")
-                plt.grid()
+                    fig=plt.figure(figsize=[8,4])
+                    ax=fig.add_subplot(1, 1, 1)
+                    plt.xlim(-0.5, max(test_x)+1)
+                    plt.ylim(-0.75, 14)
+                    plt.scatter(plot_x,plot_y,c=count,s=30*count**0.5,cmap='Spectral_r', linewidths=0.4, edgecolors=(0,0,0))
+                    plt.colorbar()
+                    plt.xlabel('Ground Truth Count\nEps:{}, Min pts={}'.format(eps,min_pts)), plt.ylabel('Predicted Count')
+                    plt.title("Test set: Cluster Consensus vs Ground Truth Scatterplot")
+                    plt.grid()
 
-                out_pth = os.path.join(out_scatterimg, 'scatter_e{}_m{}.png'.format(eps,min_pts) )
-                fig.savefig(out_pth,bbox_inches='tight', dpi=100)
-                plt.close('all')
+                    out_pth = os.path.join(out_scatterimg, 'scatter_e{}_m{}.png'.format(eps,min_pts) )
+                    fig.savefig(out_pth,bbox_inches='tight', dpi=100)
+                    plt.close('all')
 
     with open(out_txtname, 'w') as f:
         # f.write(" ".join(p2ptr_names) + "\n")
