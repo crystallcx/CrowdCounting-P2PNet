@@ -9,30 +9,7 @@ import pandas as pd
 from collections import Counter
 from sklearn.cluster import DBSCAN
 
-db_dir = "/home/n10203478/EGH400/database/"
-p2p_dir = "/home/n10203478/koaladetection/CrowdCounting-P2PNet/"  
-out_scatterimg = '../consensus_5/'     # name of dir to save scatter plot images to
-no_runs = 5
-
-if not os.path.exists(out_scatterimg):
-    os.mkdir(out_scatterimg)
-
-# store ground truth for test set in test_array
-with open(os.path.join(db_dir,"test_gt.txt")) as load_file:
-    gt_test = [tuple(line.split()) for line in load_file]
-
-test_array=[]
-for file in glob.glob(os.path.join(db_dir,"test/*.png")): 
-    img = cv2.imread(file)
-    filename = os.path.basename(file)#.split(".")[0]    
-    pre = filename.split(".")[0]    
-
-    for line in gt_test:
-        if line[0] == filename:
-            count = line[1]
-            test_array.append(tuple([pre,count,img]))   
-
-def cluster_img(filename, eps=6.6, min_samples = 3): #outputs filename, no.clusters, mean co-ords
+def get_clus_means(p2p_dir, no_runs, filename, eps=6.6, min_samples = 3): #outputs filename, no.clusters, mean co-ords
 
     pts = [] 
     X = [] 
@@ -66,8 +43,6 @@ def cluster_img(filename, eps=6.6, min_samples = 3): #outputs filename, no.clust
 
     return means
 
-    # return[filename, K, means]
-
 def parse_p2p(filepth, coords, median_w=21, median_h=21, img_w=640, img_h=512): 
     obj_id = 0 #deer
     arbitary_w = median_w/img_w #  median width = 21
@@ -83,19 +58,34 @@ def parse_p2p(filepth, coords, median_w=21, median_h=21, img_w=640, img_h=512):
             f.write(p.format(obj_id,plot_x,plot_y,arbitary_w,arbitary_h))
 
 def main():
-    eps = 6.6
-    min_samples = 3
+    # setup command line arguments
+    parser = argparse.ArgumentParser(description='Detector Test')
+
+    parser.add_argument("--db_dir", action="store", dest="db_dir", default="/home/n10203478/EGH400/database/") # database directory
+    parser.add_argument("--p2p_dir", action="store", dest="p2p_dir", default="/home/n10203478/koaladetection/CrowdCounting-P2PNet/") # p2pnet directory
+    parser.add_argument("--outpath", action="store", dest="out_pth", default='../consensus_10/' )  # name of dir to save scatter plot images to
+    parser.add_argument("--no_runs", type=int, dest="no_runs", default=None) # number of runs
+    parser.add_argument("--eps", type=float, dest="eps", default=None) # eps value for DBSCAN
+    parser.add_argument("--minpts", type=int, dest="minpts", default=None) # minimum pts value for DBSCAN
+
+    args = parser.parse_args()  
+
+    if not os.path.exists(args.out_pth):
+        os.mkdir(args.out_pth)
+
+    # store ground truth for test set in test_array
+    with open(os.path.join(args.db_dir,"test_gt.txt")) as load_file:
+        gt_test = [tuple(line.split()) for line in load_file]
+
+    # for 5 runs, 6.6, 3
+    # for 10 runs, 5.5, 5
 
     for line in gt_test:
         filename = (line[0])[:-4]
-        count = int(line[1])
+        means = get_clus_means(args.p2p_dir, args.no_runs, filename, args.eps, args.minpts)
 
-        means = cluster_img(filename, eps, min_samples)
-        # print("next:", means)
-
-        filepth = os.path.join(out_scatterimg,filename+".txt")
-
-        if len(means)>0:
+        filepth = os.path.join(args.out_pth,filename+".txt")
+        if len(means) > 0:
             parse_p2p(filepth, means)
         else:
             open(filepth,'w').close()
