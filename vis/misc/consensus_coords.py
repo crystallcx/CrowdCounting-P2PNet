@@ -52,18 +52,20 @@ def parse_p2p(filepth, coords, median_w=21, median_h=21, img_w=640, img_h=512):
         for lines in coords:
             print(lines)
             # line =  (lines.tostring().split())
-            plot_x = float(lines[0])/img_w # x center - arbitary_w/2
-            plot_y = float(lines[1])/img_h # y center - arbitary_h/2
-            p = "{} {} {} {} {}\n"
-            f.write(p.format(obj_id,plot_x,plot_y,arbitary_w,arbitary_h))
+            plot_x = float(lines[0])/img_w # x center 
+            plot_y = float(lines[1])/img_h # y center 
+            p = "{} {}\n"
+            # f.write(p.format(obj_id,plot_x,plot_y,arbitary_w,arbitary_h))  #yolov5 format
+            f.write(p.format(plot_x, plot_y))  #co-ord format
+
 
 def main():
     # setup command line arguments
-    parser = argparse.ArgumentParser(description='Detector Test')
+    parser = argparse.ArgumentParser(description='Consensus Coordinates')
 
     parser.add_argument("--db_dir", action="store", dest="db_dir", default="/home/n10203478/EGH400/database/") # database directory
     parser.add_argument("--p2p_dir", action="store", dest="p2p_dir", default="/home/n10203478/koaladetection/CrowdCounting-P2PNet/") # p2pnet directory
-    parser.add_argument("--outpath", action="store", dest="out_pth", default='../consensus_10/' )  # name of dir to save scatter plot images to
+    parser.add_argument("--out_dir", action="store", dest="out_pth", default='../consensus/' )  # name of dir to save scatter plot images to
     parser.add_argument("--no_runs", type=int, dest="no_runs", default=None) # number of runs
     parser.add_argument("--eps", type=float, dest="eps", default=None) # eps value for DBSCAN
     parser.add_argument("--minpts", type=int, dest="minpts", default=None) # minimum pts value for DBSCAN

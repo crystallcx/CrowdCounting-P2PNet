@@ -14,11 +14,15 @@ from sklearn import metrics
 from sklearn.preprocessing import StandardScaler
 
 db_dir = "/home/n10203478/EGH400/database/"
-p2p_dir = "/home/n10203478/EGH400/koaladetection/CrowdCounting-P2PNet/"  
+p2p_dir = "/home/n10203478/koaladetection/CrowdCounting-P2PNet/"  
 out_scatterimg = './scatterimages_10/'     # name of dir to save scatter plot images to
 out_txtname = 'clus_scan_out_10_test.txt'  # name of txt file to print results to
 # p2ptr_names=['run_1','run_2', 'run_3', 'run_4', 'run_5']  # expected naming convention
 no_runs = 10
+
+
+if not os.path.exists(out_scatterimg):
+    os.mkdir(out_scatterimg)
 
 # store ground truth for test set in test_array
 with open(os.path.join(db_dir,"test_gt.txt")) as load_file:
@@ -46,14 +50,14 @@ def cluster_img(k, eps=5, min_samples = 3): #outputs filename, no.clusters, mean
     filename = test_array[k][0]+".png"
 
     # Obtain pred points from all 5 trains and store in array X
-    for i in range(no_runs): 
-        pts_path = (os.path.join(p2p_dir,"vis","run_"+str(i+1),test_array[k][0]+'.txt'))
+    for ii in range(no_runs): 
+        pts_path = (os.path.join(p2p_dir,"vis","run_"+str(ii+1),test_array[k][0]+'.txt'))
         # pts_path = (os.path.join(p2p_dir,"vis",p2ptr_names[i],test_array[k][0]+'.txt'))
         with open(pts_path) as load_file:
             pts.append([(line.split()) for line in load_file])
 
-    for i in range(no_runs): 
-        for p in pts[i]:
+    for ii in range(no_runs): 
+        for p in pts[ii]:
             x = int(float(p[0])*640)
             y = int(float(p[1])*512)
             X.append([x,y])
@@ -106,8 +110,8 @@ def main():
             test_y = column(cluster_pts_sorted, 1) 
 
             correct = 0
-            for i in range(len(test_y)):
-                if test_y[i] == test_x[i]:
+            for ii in range(len(test_y)):
+                if test_y[ii] == test_x[ii]:
                     correct += 1
 
             acc = round(correct/len(gt_test),5)
@@ -116,7 +120,7 @@ def main():
             mse = round(metrics.mean_squared_error(test_x,test_y),5)
 
             # only record value if below 0.3
-            if mse<= 0.45 or mae <=0.3:
+            if mse<= 0.5 or mae <=0.3:
 
                 output.append([eps, min_pts, mse, mae, acc])
 
@@ -145,7 +149,7 @@ def main():
                     plt.ylim(-0.75, 14)
                     plt.scatter(plot_x,plot_y,c=count,s=30*count**0.5,cmap='Spectral_r', linewidths=0.4, edgecolors=(0,0,0))
                     plt.colorbar()
-                    plt.xlabel('Ground Truth Count\nEps:{}, Min pts={}'.format(eps,min_pts)), plt.ylabel('Predicted Count')
+                    plt.xlabel('Ground Truth Count\nEps:{}, Min pts={}\nmae: {}, mse: {}'.format(eps,min_pts,mae,mse)), plt.ylabel('Predicted Count')
                     plt.title("Test set: Cluster Consensus vs Ground Truth Scatterplot")
                     plt.grid()
 
