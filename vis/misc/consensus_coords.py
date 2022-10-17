@@ -9,6 +9,11 @@ import pandas as pd
 from collections import Counter
 from sklearn.cluster import DBSCAN
 
+# Obtain consensus set coords in .txt for each img in test set
+#=============================================================================================
+# example usage: consensus_coords.py --out_dir '../consensus_05/' --no_runs 5 --eps 6.6 --minpts 3
+#=============================================================================================
+
 def get_clus_means(p2p_dir, no_runs, filename, eps=6.6, min_samples = 3): #outputs filename, no.clusters, mean co-ords
 
     pts = [] 
